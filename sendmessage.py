@@ -21,7 +21,7 @@ for line in raw_cookies.split(';'):
 text = '您好！我是《数码世界》杂志摄影专栏徐敏，15810683299同微信，欢迎您的摄影作品来我们杂志刊登发表、做专栏、专访！我们杂志正在回馈摄影人，邀请您参加迎2018年新春杯摄影大赛。另开辟了甄选特约摄影师+申办摄影采访证活动！真诚邀请您的参加！'
 url = 'http://web-api.poco.cn/v1_1/message/create_notify'
 
-conn = MySQLdb.connect(host='localhost', port = 3306, user='root', passwd='123123', db ='spider')
+conn = MySQLdb.connect(host='localhost', port = 3306, user='root', passwd='123123', db ='spider', charset='utf8')
 cur = conn.cursor()
 
 result = cur.execute("select id,user_id from spider_log order by id limit %s, %s" % (offset, limit))
@@ -33,7 +33,7 @@ for row in rows:
 	#print rid,uid
 	#exit()
 	try:
-		param = '{"thread_id":"","action":4,"content":"%s","receiver_user_id":"%s","target_type":3,"user_id":200073849,"access_token":"2377136539240415313"}' % (text, uid)
+		param = '{"thread_id":"","action":4,"content":"%s","receiver_user_id":"%s","target_type":3,"user_id":188535207,"access_token":"7133217554889327475"}' % (text, uid)
 		plant = 'poco_%s_app' % param
 		m1 = md5.new()
 		m1.update(plant)   
@@ -45,8 +45,8 @@ for row in rows:
 		response = requests.post(url, cookies=cookie, data=data)
 		resultJson = json.loads(response.text)
 		if resultJson['code'] == 10000:
-			print response.text
-			print rid, uid, 'send success'
+			message = resultJson['message'].encode('utf8')
+			print rid, uid, message
 		else:
 			print rid, uid, response.text
 		time.sleep(180)	

@@ -26,7 +26,7 @@ text = '老师您好，我是《数码世界》杂志摄影栏目的徐敏，为
 chinese_space = '！'
 url = 'https://my.fengniao.com/ajax/ajaxMessage.php'
 
-conn = MySQLdb.connect(host='localhost', port = 3306, user='root', passwd='123123', db ='spider')
+conn = MySQLdb.connect(host='localhost', port = 3306, user='root', passwd='123123', db ='spider', charset='utf8')
 cur = conn.cursor()
 
 result = cur.execute("select id,user_id,nickname from fengniao_log order by id limit %s, %s" % (offset, limit))
@@ -51,15 +51,16 @@ for row in rows:
 		#print resultJson
 		#exit()
 		if resultJson['code'] == 1:
-			print response.text
-			print rid, uid, nickname, 'send success'
+			#print response.text.encode('utf8')
+			msg = resultJson['msg'].encode('utf8')
+			print rid, uid, nickname, msg
 			error_count = 0
 		else:
 			print rid, uid, nickname, response.text
 			error_count = error_count + 1
 			if error_count >= 10:
 				exit()
-		time.sleep(180)	
+		time.sleep(300)	
 	except Exception, e:
 		print e.message
 
