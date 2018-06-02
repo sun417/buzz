@@ -7,6 +7,7 @@ import time
 import md5
 import json
 import random
+import traceback
 from lxml import html
 from var_dump import var_dump
 
@@ -22,11 +23,11 @@ for line in raw_cookies.split(';'):
 	key,value = line.split("=", 1)
 	cookie[key] = value
 
-text = '老师您好，我是《数码世界》杂志摄影栏目的徐敏，为了为广大摄影爱好者搭建一个最具专业的摄影创作交流平台，现特开展“数码摄影2018年优秀作品评选”的春季赛评选活动。欢迎各位老师踊跃参与，详情请加微信15810683299，了解详情！'
+text = '您好！我是《数码世界》杂志摄影专栏徐敏，15810683299同微信，欢迎您的摄影作品来我们杂志刊登发表、做专栏、专访！我们杂志正在回馈摄影人，邀请您参加2018年优秀作品展示（夏季赛）评选大赛。另开辟了甄选特约摄影师+申办摄影采访证活动！真诚邀请您的参加！'
 chinese_space = '！'
 url = 'https://my.fengniao.com/ajax/ajaxMessage.php'
 
-conn = MySQLdb.connect(host='localhost', port = 3306, user='root', passwd='123123', db ='spider', charset='utf8')
+conn = MySQLdb.connect(host='127.0.0.1', port = 3306, user='root', passwd='123123', db ='spider', charset='utf8')
 cur = conn.cursor()
 
 result = cur.execute("select id,user_id,nickname from fengniao_log order by id limit %s, %s" % (offset, limit))
@@ -36,33 +37,35 @@ error_count = 0
 for row in rows:
 	rid,uid,nickname = row
 	#rid,uid,nickname = (1,10803486,'sun417')
-	#print rid,uid,nickname
-	#exit()
+	print rid,uid,nickname
+	exit()
 	try:
 		while True:
 			r = random.randint(0,2)
 			if r != old_r:
 				break
-		print r, old_r
-		data = {'f_userid':uid,'nickname':nickname,'invite_content':text + chinese_space * r,'action':'sendMessage'}
+		data = {'f_userid':uid,'nickname':nickname,'invite_content':text + chinese_space * r + '　','action':'sendMessage'}
 		old_r = r
 		response = requests.post(url, cookies=cookie, data=data)
 		resultJson = json.loads(response.text)
-		#print resultJson
-		#exit()
 		if resultJson['code'] == 1:
 			#print response.text.encode('utf8')
 			msg = resultJson['msg'].encode('utf8')
-			print rid, uid, nickname, msg
+			print rid, uid, msg
 			error_count = 0
 		else:
-			print rid, uid, nickname, response.text
+			print rid, uid, resultJson['msg'].encode('utf8')
 			error_count = error_count + 1
 			if error_count >= 10:
 				exit()
 		time.sleep(300)	
 	except Exception, e:
-		print e.message
+		pass
+		#print str(Exception)
+		#print str(e)
+		#print repr(e)
+		#print traceback.print_exc()
+		#exit()
 
 cur.close()
 conn.close()
