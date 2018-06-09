@@ -11,9 +11,6 @@ import traceback
 from lxml import html
 from var_dump import var_dump
 
-#print random.randint(1,5)
-#exit()
-
 offset = sys.argv[1]
 limit = sys.argv[2]
 
@@ -23,49 +20,35 @@ for line in raw_cookies.split(';'):
 	key,value = line.split("=", 1)
 	cookie[key] = value
 
-text = '您好！我是《数码世界》杂志摄影专栏徐敏，15810683299同微信，欢迎您的摄影作品来我们杂志刊登发表、做专栏、专访！我们杂志正在回馈摄影人，邀请您参加2018年优秀作品展示（夏季赛）评选大赛。另开辟了甄选特约摄影师+申办摄影采访证活动！真诚邀请您的参加！'
-chinese_space = '！'
+message = '您好！我是《数码世界》杂志摄影专栏徐敏，15810683299同微信，欢迎您的摄影作品来我们杂志刊登发表、做专栏、专访！我们杂志正在回馈摄影人，邀请您参加2018年优秀作品展示（夏季赛）评选大赛。另开辟了甄选特约摄影师+申办摄影采访证活动！真诚邀请您的参加！'
 url = 'https://my.fengniao.com/ajax/ajaxMessage.php'
 
-conn = MySQLdb.connect(host='127.0.0.1', port = 3306, user='root', passwd='123123', db ='spider', charset='utf8')
+conn = MySQLdb.connect(host='127.0.0.1', port = 3306, user='root', passwd='123123', db ='spider')
 cur = conn.cursor()
 
 result = cur.execute("select id,user_id,nickname from fengniao_log order by id limit %s, %s" % (offset, limit))
 rows = cur.fetchmany(result)
-old_r = -1
-error_count = 0
+count = int(offset)
 for row in rows:
 	rid,uid,nickname = row
-	#rid,uid,nickname = (1,10803486,'sun417')
-	print rid,uid,nickname
-	exit()
 	try:
-		while True:
-			r = random.randint(0,2)
-			if r != old_r:
-				break
-		data = {'f_userid':uid,'nickname':nickname,'invite_content':text + chinese_space * r + '　','action':'sendMessage'}
-		old_r = r
+		text = nickname + message
+		print text
+		data = {'f_userid':uid,'nickname':nickname,'invite_content':text,'action':'sendMessage'}
 		response = requests.post(url, cookies=cookie, data=data)
 		resultJson = json.loads(response.text)
 		if resultJson['code'] == 1:
-			#print response.text.encode('utf8')
 			msg = resultJson['msg'].encode('utf8')
-			print rid, uid, msg
-			error_count = 0
+			print count, ":", rid, uid, msg
+			time.sleep(20)
 		else:
-			print rid, uid, resultJson['msg'].encode('utf8')
-			error_count = error_count + 1
-			if error_count >= 10:
-				exit()
-		time.sleep(300)	
+			print count, ":", rid, uid, resultJson['code'], resultJson['msg'].encode('utf8')
+			if resultJson['code'] == -9:
+				print("休眠12小时")
+				time.sleep(12 * 60 * 60)
+		count = count + 1
 	except Exception, e:
 		pass
-		#print str(Exception)
-		#print str(e)
-		#print repr(e)
-		#print traceback.print_exc()
-		#exit()
 
 cur.close()
 conn.close()
