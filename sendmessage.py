@@ -18,7 +18,7 @@ for line in raw_cookies.split(';'):
     key,value = line.split("=", 1)
     cookie[key] = value
 
-text = '您好！我是《数码世界》杂志摄影专栏徐敏，15810683299同微信，欢迎您的摄影作品来我们杂志刊登发表、做专栏、专访！我们杂志正在回馈摄影人，邀请您参加2018年优秀作品展示（夏季赛）评选大赛。另开辟了甄选特约摄影师+申办摄影采访证活动！真诚邀请您的参加！'
+text = '您好！我是《数码世界》杂志摄影专栏徐敏，15810683299同微信，欢迎您的摄影作品来我们杂志刊登发表、做专栏、专访！我们杂志正在回馈摄影人，邀请您参加由中国新时代摄影家协会 、《数码世界》杂志社主办的首届“著名摄影师”暨“优秀摄影师”评选！'
 url = 'http://web-api.poco.cn/v1_1/message/create_notify'
 
 conn = MySQLdb.connect(host='127.0.0.1', port = 3306, user='root', passwd='123123', db ='spider', charset='utf8')
@@ -33,7 +33,8 @@ for row in rows:
 	#print rid,uid
 	#exit()
 	try:
-		param = '{"thread_id":"","action":4,"content":"%s","receiver_user_id":"%s","target_type":3,"user_id":188535207,"access_token":"2811521866772316641"}' % (text, uid)
+		#param = '{"thread_id":"","action":4,"content":"%s","receiver_user_id":"%s","target_type":3,"user_id":188535207,"access_token":"2811521866772316641"}' % (text, uid)
+		param = '{"thread_id":"","action":4,"content":"%s","receiver_user_id":"%s","target_type":3,"user_id":200827558,"access_token":"6945828482500471850"}' % (text, uid)
 		plant = 'poco_%s_app' % param
 		m1 = md5.new()
 		m1.update(plant)   
@@ -48,7 +49,8 @@ for row in rows:
 			message = resultJson['message'].encode('utf8')
 			print rid, uid, message
 		else:
-			print rid, uid, response.text
+			message = resultJson['message'].encode('utf8')
+			print rid, uid, message
 		time.sleep(180)	
 	except Exception, e:
 		print e.message
