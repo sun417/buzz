@@ -18,7 +18,6 @@ def getHtml(url):
 		return response.content
 
 def analyzeHtml(url, p):
-	#p = r'(Email|qq|手机) : </span>(.*?)</div>'
 	html = getHtml(url)
 	pattern = re.compile(p)
 	return pattern.findall(html)
