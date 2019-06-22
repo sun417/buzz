@@ -66,6 +66,8 @@ def run(uid, current_crawl_deep):
 		data = json['data']
 		score = data['level_point_info']['total_points']
 		level = data['level_point_info']['level_name']
+		if email == '' and qq != '':
+			email = qq + '@qq.com'
 		sql = "insert into poco (user_id, user_name, city, email, qq, phone, gender, age, equip, introduce, level, score, album_count, fans_count, follow_count) " \
 		"value (%d,'%s','%s','%s','%s','%s','%s',%d,'%s','%s','%s',%d,%d,%d,%d)" % (uid, user_name, city, email, qq, phone, gender,age,equip,introduce,level,score,albumCount,fans_count,follow_count)
 		try:
@@ -124,7 +126,7 @@ def main():
 	conn = pymysql.connect(host='127.0.0.1', unix_socket='/tmp/mysql.sock', user='root', passwd='123123', db='spider', charset='utf8')
 	cur = conn.cursor()
 	uidList = getUidList()
-	seed_id =200977292# 种子url
+	seed_id = 200783533# 种子url
 	run(seed_id, 0)
 	cur.close()
 	conn.close()
