@@ -31,67 +31,71 @@ def run(uid, current_crawl_deep):
 	if count != 0:
 		return
 	current_crawl_deep += 1
-	url = 'http://web-api.poco.cn/v1_1/space/get_user_works_list'
-	param = '{"user_id": null, "visited_user_id": %d, "keyword": "", "year": 0, "works_type": 0, "length": 18, "start": 0}' % (uid)
-	json = getJson(url, param)
-	if json['code'] != 10000 :
-		print("%d 的获取作品数量失败" % uid)
-		return
-	albumCount = json['data']['total'] #作品数量
-	if albumCount == 0 :
-		return
-	url = 'http://web-api.poco.cn/v1_1/space/get_brief_user_info'
-	param = '{"visited_user_id":%d,"user_id":null}' % uid
-	json = getJson(url, param)
-	data = json['data']
-	fans_count = data['fans_count']
-	follow_count = data['follower_count']
-	user_name = data['nickname']
-	url = 'http://web-api.poco.cn/v1_1/space/get_user_profile'
-	json = getJson(url, param)
-	data = json['data']
-	city = data['location_name']
-	email = data['associate_email']
-	qq = data['associate_qq']
-	phone = data['associate_phone']
-	gender = data['sex']
-	age = data['age']
-	introduce = data['description']
-	equip = ''
-	if data['equipment'].__contains__('camera'):
-		equip = data['equipment']['camera']['brand_name'] + ' ' + data['equipment']['camera']['model_name']
-	url = 'http://web-api.poco.cn/v1_1/integral/get_user_honor'
-	json = getJson(url, param)
-	data = json['data']
-	score = data['level_point_info']['total_points']
-	level = data['level_point_info']['level_name']
-	sql = "insert into poco (user_id, user_name, city, email, qq, phone, gender, age, equip, introduce, level, score, album_count, fans_count, follow_count) " \
-	"value (%d,'%s','%s','%s','%s','%s','%s',%d,'%s','%s','%s',%d,%d,%d,%d)" % (uid, user_name, city, email, qq, phone, gender,age,equip,introduce,level,score,albumCount,fans_count,follow_count)
 	try:
-		cur.execute(sql)
-		conn.commit()
-		print('%d - %s' % (uid, user_name))
-		time.sleep(5)
-	except Exception as e:
-		print('%d - %s - %s' % (uid, user_name, e))
-		pass
-
-	if current_crawl_deep > 7:
-		return
-
-
-# 	#解析好友
-	p = 0
-	while True:
-		url = 'http://web-api.poco.cn/v1_1/space/get_user_follow_list'
-		param = '{"user_id":null,"visited_user_id":%d,"length":18,"start":%d}' % (uid, p * 18)
+		url = 'http://web-api.poco.cn/v1_1/space/get_user_works_list'
+		param = '{"user_id": null, "visited_user_id": %d, "keyword": "", "year": 0, "works_type": 0, "length": 18, "start": 0}' % (uid)
+		json = getJson(url, param)
+		if json['code'] != 10000 :
+			print("%d 的获取作品数量失败" % uid)
+			return
+		albumCount = json['data']['total'] #作品数量
+		if albumCount == 0 :
+			return
+		url = 'http://web-api.poco.cn/v1_1/space/get_brief_user_info'
+		param = '{"visited_user_id":%d,"user_id":null}' % uid
 		json = getJson(url, param)
 		data = json['data']
-		for user in data['list'] :
-			run(user['user_id'], current_crawl_deep)
-		if not data['has_more'] :
-			break
-		p += 1
+		fans_count = data['fans_count']
+		follow_count = data['follower_count']
+		user_name = data['nickname']
+		url = 'http://web-api.poco.cn/v1_1/space/get_user_profile'
+		json = getJson(url, param)
+		data = json['data']
+		city = data['location_name']
+		email = data['associate_email']
+		qq = data['associate_qq']
+		phone = data['associate_phone']
+		gender = data['sex']
+		age = data['age']
+		introduce = data['description']
+		equip = ''
+		if data['equipment'].__contains__('camera'):
+			equip = data['equipment']['camera']['brand_name'] + ' ' + data['equipment']['camera']['model_name']
+		url = 'http://web-api.poco.cn/v1_1/integral/get_user_honor'
+		json = getJson(url, param)
+		data = json['data']
+		score = data['level_point_info']['total_points']
+		level = data['level_point_info']['level_name']
+		sql = "insert into poco (user_id, user_name, city, email, qq, phone, gender, age, equip, introduce, level, score, album_count, fans_count, follow_count) " \
+		"value (%d,'%s','%s','%s','%s','%s','%s',%d,'%s','%s','%s',%d,%d,%d,%d)" % (uid, user_name, city, email, qq, phone, gender,age,equip,introduce,level,score,albumCount,fans_count,follow_count)
+		try:
+			cur.execute(sql)
+			conn.commit()
+			print('%d - %s' % (uid, user_name))
+			time.sleep(5)
+		except Exception as e:
+			print('%d - %s - %s' % (uid, user_name, e))
+			pass
+
+		if current_crawl_deep > 7:
+			return
+
+
+		#解析好友
+		p = 0
+		while True:
+			url = 'http://web-api.poco.cn/v1_1/space/get_user_follow_list'
+			param = '{"user_id":null,"visited_user_id":%d,"length":18,"start":%d}' % (uid, p * 18)
+			json = getJson(url, param)
+			data = json['data']
+			for user in data['list'] :
+				run(user['user_id'], current_crawl_deep)
+			if not data['has_more'] :
+				break
+			p += 1
+	except Exception as e:
+		print('%d - %s' % (uid, e))
+		pass
 
 def getUidList():
 	global cur, conn
@@ -120,7 +124,7 @@ def main():
 	conn = pymysql.connect(host='127.0.0.1', unix_socket='/tmp/mysql.sock', user='root', passwd='123123', db='spider', charset='utf8')
 	cur = conn.cursor()
 	uidList = getUidList()
-	seed_id = 56796953# 种子url
+	seed_id =200977292# 种子url
 	run(seed_id, 0)
 	cur.close()
 	conn.close()
