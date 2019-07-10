@@ -126,7 +126,7 @@ def main():
 	conn = pymysql.connect(host='127.0.0.1', unix_socket='/tmp/mysql.sock', user='root', passwd='123123', db='spider', charset='utf8')
 	cur = conn.cursor()
 	uidList = getUidList()
-	seed_id = 200783533# 种子url
+	seed_id = 200608617# 种子url
 	run(seed_id, 0)
 	cur.close()
 	conn.close()

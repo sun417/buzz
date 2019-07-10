@@ -7,16 +7,9 @@ import json
 import time
 
 
-# def getData(param):
-# 	plant = 'poco_%s_app' % param
-# 	m5 = hashlib.md5(plant.encode(encoding='UTF-8')).hexdigest()
-# 	sign_code = m5[5:5 + 19]
-# 	ctime = int(round(time.time() * 1000))
-# 	req = '{"version":"1.1.0","app_name":"poco_photography_web","os_type":"weixin","is_enc":0,"env":"prod","ctime":%d,"param":%s,"sign_code":"%s"}' % (ctime, param, sign_code)
-# 	data = {'host_port': 'http://my.poco.cn', 'req': req}
-# 	return data
 def getHost(url):
 	return 'my.fengniao.com' if url.__contains__('my.fengniao') else 'bbs.fengniao.com'
+
 def getJson(url, param):
 	headers['Host'] = getHost(url)
 	# data = getData(param)
@@ -73,13 +66,13 @@ def run(uid, current_crawl_deep):
 	if e == None:
 		return
 	user_name = e[0].get_text()
-	gender = 0 if e[1].get_text() == '未知' else 1 if e[1].get_text() == '男' else 2
+	gender = 0 if e[1].get_text() == u'未知' else 1 if e[1].get_text() == u'男' else 2
 	city = e[2].get_text()
 	sign = e[3].get_text()
 	reg_date = e[4].get_text() 
 	weibo = e[5].get_text()
 	qq = e[6].get_text()
-	email = qq + '@qq.com' if qq != '暂无' else ''	
+	email = qq + '@qq.com' if qq != u'暂无' else ''	
 	
  
 	e =  bsObj.select('.liBox .txt')
@@ -110,9 +103,6 @@ def run(uid, current_crawl_deep):
 		if int(li['type']) == 1:
 			url = li['jumpUrl']
 			break
-	#url = json['data'][0]['jumpUrl']
-	#url = 'http://bbs.fengniao.com/forum/10722900_p94469676.html#post94469676'
-	#url = 'http://bbs.fengniao.com/forum/10722932_p94470271.html#post94470271'
 	bsObj = getHtml(url)
 	if bsObj == None:
 		return
@@ -141,10 +131,10 @@ def run(uid, current_crawl_deep):
 	try:
 		cur.execute(sql)
 		conn.commit()
-		print('%d - %s' % (uid, user_name))
-		#time.sleep(5)
+		print('%d - %s' % (uid, user_name.encode('utf8')))
+		time.sleep(5)
 	except Exception as e:
-		print('%d - %s - %s' % (uid, user_name, e))
+		print('%d - %s - %s' % (uid, user_name.encode('utf8'), e))
 		pass
 
 	if current_crawl_deep > 7:
@@ -197,11 +187,11 @@ headers = {
 
 def main():
 	global  conn, cur, uidList
-	conn = pymysql.connect(host='127.0.0.1', unix_socket='/tmp/mysql.sock', user='root', passwd='robinT20034', db='spider', charset='utf8')
+	conn = pymysql.connect(host='127.0.0.1', unix_socket='/tmp/mysql.sock', user='root', passwd='123123', db='spider', charset='utf8')
 	cur = conn.cursor()
 	uidList = getUidList()
 	# seed_id = 156286# 种子url
-	seed_id = 1144397# 种子url
+	seed_id = 1041357# 种子url
 	#seed_id = 10437722
 	run(seed_id, 0)
 	cur.close()
