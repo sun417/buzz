@@ -32,103 +32,104 @@ def getHtml(url):
 	return bs
 
 def run(uid, current_crawl_deep):
-	global cur, conn, uidList
-	if uid in uidList:
-		return
-	uidList.append(uid)
-	sql = "select id from fengniao where user_id=%d" % uid
-	count = cur.execute(sql)
-	conn.commit()
-	if count != 0:
-		return
-	current_crawl_deep += 1
-	url = 'https://my.fengniao.com/index.php?userid=%d' % uid
-	bsObj = getHtml(url)
-	if bsObj == None:
-		print("%d 的获取作品数量失败" % uid)
-		return
-	e = bsObj.select('h4.tit')
-	if len(e) == 0:
-		return
-	result = analyzeText(e[0].get_text(), '\d+')
-	if len(result) == 0:
-		return
-	album_count = int(result[0]) #作品数量
-
-	if album_count == 0 :
-		return
-
-	url = 'https://my.fengniao.com/info.php?userid=%d' % uid
-	bsObj = getHtml(url)
-	if bsObj == None:
-		return
-	e = bsObj.select('ul.dataList span.txt')
-	if e == None:
-		return
-	user_name = e[0].get_text()
-	gender = 0 if e[1].get_text() == u'未知' else 1 if e[1].get_text() == u'男' else 2
-	city = e[2].get_text()
-	sign = e[3].get_text()
-	reg_date = e[4].get_text() 
-	weibo = e[5].get_text()
-	qq = e[6].get_text()
-	email = qq + '@qq.com' if qq != u'暂无' else ''	
-	
- 
-	e =  bsObj.select('.liBox .txt')
-	if e == None:
-		return
-	fans_count = e[0].get_text()
-	follow_count = e[1].get_text()
-	level = e[2].get_text()
-	e = bsObj.select('.personalInfor .nameLabel')
-	fengniao_level = e[0].get_text()
-
-	url = 'https://my.fengniao.com/ajax/ajaxGetListsInfo.php'
-	param = {
-		"from":"getZuoPinLists",
-		"type":1,
-		"page":1,
-		"userId":uid,
-		"fromType":"index"
-		}
-	json = getJson(url, param)
-
-	if json['code'] != 1:
-		return
-	url = ''
-	for li in json['data']:
-		if type(li).__name__ != 'dict':
-			continue
-		if int(li['type']) == 1:
-			url = li['jumpUrl']
-			break
-	bsObj = getHtml(url)
-	if bsObj == None:
-		return
-
-	e = bsObj.select('.peopleTxt span')
-	score = e[0].get_text()[3:]
-
-	camera_brand = ''
-	camera_type = ''
-	camera_lens_brand = ''
-	camera_lens_type = ''
-	e = bsObj.select('.postList')
-	if len(e) > 0 :
-		e = e[0].select('.exifBox span')		
-		if len(e) != 0:
-			camera_brand = e[0].get_text()
-			camera_type = e[1].get_text()
-
-		if len(e) > 8:
-			camera_lens_brand = e[7].get_text()
-			camera_lens_type = e[8].get_text()
-
-	sql = "INSERT INTO fengniao (user_id,user_name,city,email,qq,gender,weibo,sign,reg_date,level,fengniao_level,score,album_count,fans_count,follow_count,camera_brand,camera_type,camera_lens_brand,camera_lens_type) VALUES (%d,'%s','%s','%s','%s',%d,'%s','%s','%s','%s','%s',%s,%s,%s,%s,'%s','%s','%s','%s')" % (uid,user_name,city,email,qq,gender,weibo,sign,reg_date,level,fengniao_level,score,album_count,fans_count,follow_count,camera_brand,camera_type,camera_lens_brand,camera_lens_type)
-
-	#print(sql)
 	try:
+		global cur, conn, uidList
+		if uid in uidList:
+			return
+		uidList.append(uid)
+		sql = "select id from fengniao where user_id=%d" % uid
+		count = cur.execute(sql)
+		conn.commit()
+		if count != 0:
+			return
+		current_crawl_deep += 1
+		url = 'https://my.fengniao.com/index.php?userid=%d' % uid
+		bsObj = getHtml(url)
+		if bsObj == None:
+			print("%d 的获取作品数量失败" % uid)
+			return
+		e = bsObj.select('h4.tit')
+		if len(e) == 0:
+			return
+		result = analyzeText(e[0].get_text(), '\d+')
+		if len(result) == 0:
+			return
+		album_count = int(result[0]) #作品数量
+
+		if album_count == 0 :
+			return
+
+		url = 'https://my.fengniao.com/info.php?userid=%d' % uid
+		bsObj = getHtml(url)
+		if bsObj == None:
+			return
+		e = bsObj.select('ul.dataList span.txt')
+		if e == None:
+			return
+		user_name = e[0].get_text()
+		gender = 0 if e[1].get_text() == u'未知' else 1 if e[1].get_text() == u'男' else 2
+		city = e[2].get_text()
+		sign = e[3].get_text()
+		reg_date = e[4].get_text() 
+		weibo = e[5].get_text()
+		qq = e[6].get_text()
+		email = qq + '@qq.com' if qq != u'暂无' else ''	
+		
+	
+		e =  bsObj.select('.liBox .txt')
+		if e == None:
+			return
+		fans_count = e[0].get_text()
+		follow_count = e[1].get_text()
+		level = e[2].get_text()
+		e = bsObj.select('.personalInfor .nameLabel')
+		fengniao_level = e[0].get_text()
+
+		url = 'https://my.fengniao.com/ajax/ajaxGetListsInfo.php'
+		param = {
+			"from":"getZuoPinLists",
+			"type":1,
+			"page":1,
+			"userId":uid,
+			"fromType":"index"
+			}
+		json = getJson(url, param)
+
+		if json['code'] != 1:
+			return
+		url = ''
+		for li in json['data']:
+			if type(li).__name__ != 'dict':
+				continue
+			if int(li['type']) == 1:
+				url = li['jumpUrl']
+				break
+		bsObj = getHtml(url)
+		if bsObj == None:
+			return
+
+		e = bsObj.select('.peopleTxt span')
+		score = e[0].get_text()[3:]
+
+		camera_brand = ''
+		camera_type = ''
+		camera_lens_brand = ''
+		camera_lens_type = ''
+		e = bsObj.select('.postList')
+		if len(e) > 0 :
+			e = e[0].select('.exifBox span')		
+			if len(e) != 0:
+				camera_brand = e[0].get_text()
+				camera_type = e[1].get_text()
+
+			if len(e) > 8:
+				camera_lens_brand = e[7].get_text()
+				camera_lens_type = e[8].get_text()
+
+		sql = "INSERT INTO fengniao (user_id,user_name,city,email,qq,gender,weibo,sign,reg_date,level,fengniao_level,score,album_count,fans_count,follow_count,camera_brand,camera_type,camera_lens_brand,camera_lens_type) VALUES (%d,'%s','%s','%s','%s',%d,'%s','%s','%s','%s','%s',%s,%s,%s,%s,'%s','%s','%s','%s')" % (uid,user_name,city,email,qq,gender,weibo,sign,reg_date,level,fengniao_level,score,album_count,fans_count,follow_count,camera_brand,camera_type,camera_lens_brand,camera_lens_type)
+
+		#print(sql)
+		
 		cur.execute(sql)
 		conn.commit()
 		print('%d - %s' % (uid, user_name.encode('utf8')))
@@ -191,7 +192,7 @@ def main():
 	cur = conn.cursor()
 	uidList = getUidList()
 	# seed_id = 156286# 种子url
-	seed_id = 1041357# 种子url
+	seed_id = 1187735# 种子url
 	#seed_id = 10437722
 	run(seed_id, 0)
 	cur.close()
