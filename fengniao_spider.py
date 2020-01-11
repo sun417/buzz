@@ -46,7 +46,6 @@ def run(uid, current_crawl_deep):
 		url = 'https://my.fengniao.com/index.php?userid=%d' % uid
 		bsObj = getHtml(url)
 		if bsObj == None:
-			print("%d 的获取作品数量失败" % uid)
 			return
 		e = bsObj.select('h4.tit')
 		if len(e) == 0:
@@ -99,9 +98,10 @@ def run(uid, current_crawl_deep):
 			return
 		url = ''
 		for li in json['data']:
+			print(li, li[0])
 			if type(li).__name__ != 'dict':
 				continue
-			if int(li['type']) == 1:
+			else:
 				url = li['jumpUrl']
 				break
 		bsObj = getHtml(url)
@@ -138,7 +138,7 @@ def run(uid, current_crawl_deep):
 		print('%d - %s - %s' % (uid, user_name.encode('utf8'), e))
 		pass
 
-	if current_crawl_deep > 7:
+	if current_crawl_deep > 15:
 		return
 
 
@@ -179,7 +179,7 @@ headers = {
 	'Accept-Language': 'zh-CN,zh;q=0.9',
 	'Cache-Control': 'max-age=0',
 	'Connection': 'keep-alive',
-	'Cookie': 'ip_ck=7saB4P32j7QuOTEwNzcxLjE1NDc5NTM3OTY%3D; Hm_lvt_916ddc034db3aa7261c5d56a3001e7c5=1558367322; bbuserid=11124656; bbpassword=96a533352aecd403ca4fd164325565dd; bbusername=FNYX11124656; lv=1560697761; vn=13; Adshow=1; Hm_lpvt_916ddc034db3aa7261c5d56a3001e7c5=1560698582',
+	'Cookie': 'ip_ck=5cSB5/j/j7QuMjMwMDI4LjE1NjI4OTY1OTU%3D; lv=1562896593; vn=1; fn_document_class_doc_id=192-5356653; Hm_lvt_916ddc034db3aa7261c5d56a3001e7c5=1562896594; PHPSESSID=bchg38n5sj6shsfetbf3jm5k44; bbuserid=11051319; bbpassword=f7ef2f0b92724a7292fd1f7b2dc515e8; bbusername=FNYX11051319; Adshow=1; Hm_lpvt_916ddc034db3aa7261c5d56a3001e7c5=1562897271',
 	'Host': 'my.fengniao.com',
 	'Referer': 'https://my.fengniao.com/',
 	'Upgrade-Insecure-Requests': '1',
@@ -191,9 +191,9 @@ def main():
 	conn = pymysql.connect(host='127.0.0.1', unix_socket='/tmp/mysql.sock', user='root', passwd='123123', db='spider', charset='utf8')
 	cur = conn.cursor()
 	uidList = getUidList()
-	# seed_id = 156286# 种子url
-	seed_id = 1187735# 种子url
-	#seedid = 10437722
+	#seed_id = 156286# 种子url
+	#seed_id = 8571903# 种子url
+	seed_id = 758864
 	run(seed_id, 0)
 	cur.close()
 	conn.close()
