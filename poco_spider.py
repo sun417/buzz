@@ -4,6 +4,7 @@ import pymysql
 import hashlib
 import time
 import json
+import sys
 
 def getData(param):
 	plant = 'poco_%s_app' % param
@@ -48,16 +49,17 @@ def run(uid, current_crawl_deep):
 		fans_count = data['fans_count']
 		follow_count = data['follower_count']
 		user_name = data['nickname']
+		user_name = user_name.replace("'", "")
 		url = 'http://web-api.poco.cn/v1_1/space/get_user_profile'
 		json = getJson(url, param)
 		data = json['data']
 		city = data['location_name']
 		email = data['associate_email']
 		qq = data['associate_qq']
-		phone = data['associate_phone']
+		phone = data['associate_phone'][:30]
 		gender = data['sex']
 		age = data['age']
-		introduce = data['description']
+		introduce = data['description'][:255]
 		equip = ''
 		if data['equipment'].__contains__('camera'):
 			equip = data['equipment']['camera']['brand_name'] + ' ' + data['equipment']['camera']['model_name']
@@ -79,7 +81,7 @@ def run(uid, current_crawl_deep):
 			print('%d - %s - %s' % (uid, user_name, e))
 			pass
 
-		if current_crawl_deep > 7:
+		if current_crawl_deep > 12:
 			return
 
 
@@ -126,7 +128,7 @@ def main():
 	conn = pymysql.connect(host='127.0.0.1', unix_socket='/tmp/mysql.sock', user='root', passwd='123123', db='spider', charset='utf8')
 	cur = conn.cursor()
 	uidList = getUidList()
-	seed_id = 200608617# 种子url
+	seed_id = int(sys.argv[1])# 种子url
 	run(seed_id, 0)
 	cur.close()
 	conn.close()
