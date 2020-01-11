@@ -193,7 +193,7 @@ def main():
 	uidList = getUidList()
 	# seed_id = 156286# 种子url
 	seed_id = 1187735# 种子url
-	#seed_id = 10437722
+	#seedid = 10437722
 	run(seed_id, 0)
 	cur.close()
 	conn.close()
