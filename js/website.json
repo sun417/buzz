@@ -1,0 +1,43 @@
+[
+    {
+        "SiteName": "活动家",
+        "Url":"https://www.huodongjia.com/",
+        "Type":"html",
+        "Charset":"utf-8",
+        "BaseUrl":"https://www.huodongjia.com/medical/page-{}/overview/",
+        "PageSelector": "",
+        "ListSelector":"tr[time] a",
+        "MeetingTitleSelector":".banner h1:first-child",
+        "MeetingDateSelector":".banner p:nth-child(2)",
+        "MeetingOpenDateRegx":"时间：(\\d{4}-\\d{2}-\\d{2})",        
+        "MeetingEndDateRegx":"至 (\\d{4}-\\d{2}-\\d{2})",
+        "MeetingPlaceSelector": ".banner p:nth-child(3)",
+        "MeetingPlaceRegx": "地点：(.+)",
+        "MeetingContentSelector": ".new_content .con_box",
+        "UpdateImage": true
+    },
+    {
+        "SiteName":"医脉通",
+        "Url":"http://meetings.medlive.cn/",
+        "Type":"json",
+        "Charset":"utf-8",
+        "BaseUrl":"http://meetings.medlive.cn/ajaxmeeting/meetingIndexPreview.html?skipauth=1&page={}&province=&date_time="
+    },
+    {
+        "SiteName":"丁香园",
+        "Url":"http://meeting.dxy.cn/",
+        "Type":"html",
+        "Charset":"utf-8",
+        "BaseUrl":"http://meeting.dxy.cn/tag/list/p-{}",
+        "PageSelector": ".el_page a:nth-child(6)",
+        "ListSelector": ".x_ct1 a",
+        "MeetingTitleSelector": "h1.title",        
+        "MeetingDateSelector": "#meeting_info li:nth-child(1)",
+        "MeetingOpenDateRegx": "(\\d{4}-\\d{2}-\\d{2})至",
+        "MeetingEndDateRegx": "至.*(\\d{4}-\\d{2}-\\d{2})",
+        "MeetingPlaceSelector": "#meeting_info li:nth-child(2)",
+        "MeetingPlaceRegx": "会议地点：\\s+(\\S*)",
+        "MeetingContentSelector": "#content",
+        "UpdateImage": true
+    }
+]
