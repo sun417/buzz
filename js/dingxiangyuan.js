@@ -116,7 +116,10 @@ class Spider {
                 let meetingEndDate = meetingDate.match(this.siteConfig.MeetingEndDateRegx)[1]
                 let meetingPlace = $(this.siteConfig.MeetingPlaceSelector).text()
                 let meetingCity = meetingPlace.match(this.siteConfig.MeetingPlaceRegx)[1]
-                let meetingContent = $(this.siteConfig.MeetingContentSelector).text()
+                let meetingContent = $(this.siteConfig.MeetingContentSelector).html()
+                let sql = `Insert yzm_article (catid,userid,username,nickname,title,seo_title,begintime,endtime,inputtime,updatetime,description,content,status) 
+                Values(1,1,'admin','管理员',?,?,?,?,?,?,?,?,1)`
+                let params = [title,title+'_医学会议网',]
                 console.log(meetingOpenDate, meetingEndDate, meetingCity,meetingContent)
                 process.exit()
             }
