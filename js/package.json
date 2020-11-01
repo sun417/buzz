@@ -1,0 +1,20 @@
+{
+  "name": "js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dingxiangyuan.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "crawler": "^1.2.2",
+    "decode-html": "^2.0.0",
+    "mysql": "^2.18.1",
+    "readline-sync": "^1.4.10",
+    "string-format": "^2.0.0"
+  }
+}

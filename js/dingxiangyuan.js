@@ -1,6 +1,6 @@
 const crawler = require("crawler")
 const readlineSync = require("readline-sync")
-const mysql = require('mysql');
+const mysql = require('mysql')
 require("string-format").extend(String.prototype)
 
 const config = require("./website.json")
@@ -12,9 +12,12 @@ class Spider {
         this.existCount = 0;
         this.c = new crawler({
             maxConnections: 10,
-            rateLimit: 5000,
+            rateLimit: 100,
             retryTimeout: 5000,
             retries: 3,
+            normalizeWhitespace: false,
+            xmlMode: false,
+            decodeEntities: true,
             preRequest: function(options, done) {
                 console.log("正在爬取：", options.uri);
                 done();
@@ -112,16 +115,20 @@ class Spider {
             } else {
                 this.existCount = 0
                 let meetingDate = $(this.siteConfig.MeetingDateSelector).text()
-                let meetingOpenDate = meetingDate.match(this.siteConfig.MeetingOpenDateRegx)[1]
-                let meetingEndDate = meetingDate.match(this.siteConfig.MeetingEndDateRegx)[1]
+                let meetingOpenDate = new Date(meetingDate.match(this.siteConfig.MeetingOpenDateRegx)[1]).getTime() / 1000
+                let meetingEndDate = new Date(meetingDate.match(this.siteConfig.MeetingEndDateRegx)[1]).getTime() / 1000
                 let meetingPlace = $(this.siteConfig.MeetingPlaceSelector).text()
                 let meetingCity = meetingPlace.match(this.siteConfig.MeetingPlaceRegx)[1]
                 let meetingContent = $(this.siteConfig.MeetingContentSelector).html()
-                let sql = `Insert yzm_article (catid,userid,username,nickname,title,seo_title,begintime,endtime,inputtime,updatetime,description,content,status) 
-                Values(1,1,'admin','管理员',?,?,?,?,?,?,?,?,1)`
-                let params = [title,title+'_医学会议网',]
-                console.log(meetingOpenDate, meetingEndDate, meetingCity,meetingContent)
+                let meetingDescription = $(meetingContent).text().trimStart().substring(0,100) + "..."
+                let inputTime = parseInt(new Date().getTime() / 1000)
+                let params = [mettingTitle,mettingTitle+'_医学会议网',meetingCity,meetingOpenDate,meetingEndDate,
+                    inputTime,inputTime,meetingDescription,meetingContent]
+                console.log(meetingContent)
                 process.exit()
+                // let result = await this.insert(params)
+                // console.log(result)
+                // process.exit()
             }
         } catch(err){
             console.log("抓取 文章 异常：", err)
@@ -140,13 +147,31 @@ class Spider {
         }
     }
 
+    async insert(params){
+        try{            
+            let sql = `Insert yzm_article (catid,userid,username,nickname,title,seo_title,city,begintime,endtime,inputtime,updatetime,description,content,status) 
+            Values(1,1,'admin','管理员',?,?,?,?,?,?,?,?,?,0)`
+            let result = await this.query(sql, params)
+            return result
+        } catch(err){
+            console.log("插入记录异常：", err)
+        }
+    }
+    // decode(str) {
+    //     return str.replace(/&#(x)?(\d+);/g, function(match, base, dec) {
+    //         console.log(match, base, dec,String.fromCharCode(dec, base ? 16 : 10))
+    //         // process.exit()
+    //         return String.fromCharCode(parseInt(dec, base ? 16 : 10))
+    //     });
+    // }
+
     async crawling(){
         let maxPage = await this.getMaxPage()
         this.getList(maxPage)
     }
 
     run(){
-        this.siteConfig = config[2]
+        this.siteConfig = config[0]
         // config.forEach((site, index) => {
         //     console.log("%d. %s", index + 1, site.SiteName)
         // })
