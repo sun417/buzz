@@ -1,6 +1,7 @@
 const crawler = require("crawler")
 const readlineSync = require("readline-sync")
 const mysql = require('mysql')
+const cheerio = require('cheerio')
 require("string-format").extend(String.prototype)
 
 const config = require("./website.json")
@@ -11,8 +12,8 @@ class Spider {
     constructor(){
         this.existCount = 0;
         this.c = new crawler({
-            maxConnections: 10,
-            rateLimit: 100,
+            maxConnections: 1,
+            rateLimit: 1000,
             retryTimeout: 5000,
             retries: 3,
             normalizeWhitespace: false,
@@ -101,9 +102,8 @@ class Spider {
 
     async getMeeting(url){
         try{
-            //url = 'http://meeting.dxy.cn/article/702547'
             let res = await this.getResponse(url)
-            let $ = res.$
+            let $ = cheerio.load(res.body, {decodeEntities: false})
             let mettingTitle = $(this.siteConfig.MeetingTitleSelector).text()
             console.log(mettingTitle)
             let isExist = await this.isExistMeeting(mettingTitle)
@@ -124,11 +124,9 @@ class Spider {
                 let inputTime = parseInt(new Date().getTime() / 1000)
                 let params = [mettingTitle,mettingTitle+'_医学会议网',meetingCity,meetingOpenDate,meetingEndDate,
                     inputTime,inputTime,meetingDescription,meetingContent]
-                console.log(meetingContent)
+                let result = await this.insert(params)
+                console.log(result)
                 process.exit()
-                // let result = await this.insert(params)
-                // console.log(result)
-                // process.exit()
             }
         } catch(err){
             console.log("抓取 文章 异常：", err)
@@ -157,13 +155,6 @@ class Spider {
             console.log("插入记录异常：", err)
         }
     }
-    // decode(str) {
-    //     return str.replace(/&#(x)?(\d+);/g, function(match, base, dec) {
-    //         console.log(match, base, dec,String.fromCharCode(dec, base ? 16 : 10))
-    //         // process.exit()
-    //         return String.fromCharCode(parseInt(dec, base ? 16 : 10))
-    //     });
-    // }
 
     async crawling(){
         let maxPage = await this.getMaxPage()
