@@ -3,6 +3,7 @@ const readlineSync = require("readline-sync")
 const mysql = require('mysql')
 const cheerio = require('cheerio')
 const fs = require('fs')
+const request = require('request')
 require("string-format").extend(String.prototype)
 
 const config = require("./website.json")
@@ -36,21 +37,34 @@ class Spider {
         this.connection.connect()
     }
 
-    getResponse(uri){
+    getResponse(uri, isDownload = false){
 		let that = this
 		return new Promise(function(resolve, reject){
-			that.c.queue({
-        	    uri : uri,
-        	    callback: function(err,res, done){
-                    done()
-					if(err != null){
-						reject(err)
-					} else {
-                        let $ = cheerio.load(res.body, {decodeEntities: false})
-						resolve($)
-					}
-				}	
-        	})
+            if(isDownload){
+                that.c.direct({
+                    uri,
+                    callback: function(err, res){
+                        if(err != null){
+                            reject(err)
+                        } else {
+                            resolve(res)
+                        }
+                    }
+                })
+            } else{
+                that.c.queue({
+                    uri : uri,
+                    callback: function(err,res, done){
+                        done()
+                        if(err != null){
+                            reject(err)
+                        } else {                            
+                            let $ = cheerio.load(res.body, {decodeEntities: false})
+                            resolve($)
+                        }
+                    }	
+                })
+            }
 		})
     }
 
@@ -92,7 +106,6 @@ class Spider {
                     }
                     //console.log(url)
                     await this.getMeeting(url)
-                    //await delay(500)
                 })
             }
         } catch(err){
@@ -101,6 +114,8 @@ class Spider {
     }
 
     async getMeeting(url){
+        url = 'https://www.huodongjia.com//event-1723507090.html'
+        let that = this
         try{
             let $ = await this.getResponse(url)
             let mettingTitle = $(this.siteConfig.MeetingTitleSelector).text()
@@ -114,16 +129,23 @@ class Spider {
                 }
             } else {
                 this.existCount = 0
+                let meetingContent = $(this.siteConfig.MeetingContentSelector).html()
                 if(this.siteConfig.UpdateImage){
                     let imgs = $(this.siteConfig.MeetingContentSelector + ' img')
-                    console.log(imgs)
+                    console.log(imgs.length)
+                    for(let i = 0; i < imgs.length; i++){
+                        let res = await this.downloadImage(imgs[i].attribs.src)
+                    }
+                    // $(this.siteConfig.MeetingContentSelector + ' img').each(async(index, item) => {
+                    //     await that.downloadImage(item.attribs.src)
+                    // })
                 }
+                process.exit()
                 let meetingDate = $(this.siteConfig.MeetingDateSelector).text()
                 let meetingOpenDate = new Date(meetingDate.match(this.siteConfig.MeetingOpenDateRegx)[1]).getTime() / 1000
                 let meetingEndDate = new Date(meetingDate.match(this.siteConfig.MeetingEndDateRegx)[1]).getTime() / 1000
                 let meetingPlace = $(this.siteConfig.MeetingPlaceSelector).text()
                 let meetingCity = meetingPlace.match(this.siteConfig.MeetingPlaceRegx)[1]
-                let meetingContent = $(this.siteConfig.MeetingContentSelector).html()
                 let meetingDescription = $(meetingContent).text().trimStart().substring(0,100) + "..."
                 let inputTime = parseInt(new Date().getTime() / 1000)
                 let params = [mettingTitle,mettingTitle+'_医学会议网',meetingCity,meetingOpenDate,meetingEndDate,
@@ -138,6 +160,22 @@ class Spider {
             console.log("抓取 文章 异常：", err)
             console.log(url)
         }
+    }
+
+    async downloadImage(url){
+        console.log(url)
+        let fileName = url.split('/').pop()
+        console.log(fileName)
+        // request({url}).pipe(fs.createWriteStream(`./images/${fileName}`).on('close',err=>{  console.log('写入失败',err) }))
+        // await request(url, async(error, response, body) => {
+        //     if(!error && response.statusCode == 200){
+        //         console.log(body)
+        //     } else {
+        //         console.log(error)
+        //     }
+        // })
+        let res = await this.getResponse(url, true)
+        console.log(res.body)
     }
 
     async isExistMeeting(title){
