@@ -1,0 +1,17 @@
+{
+  "name": "js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dingxiangyuan.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "crawler": "^1.2.2",
+    "mysql": "^2.18.1",
+    "readline-sync": "^1.4.10",
+    "string-format": "^2.0.0"
+  }
+}
