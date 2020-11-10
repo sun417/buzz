@@ -3,6 +3,7 @@ const readlineSync = require("readline-sync")
 const mysql = require('mysql')
 const cheerio = require('cheerio')
 const fs = require('fs')
+const path = require("path")
 const request = require('request')
 require("string-format").extend(String.prototype)
 
@@ -164,8 +165,27 @@ class Spider {
 
     async downloadImage(url){
         console.log(url)
-        let fileName = url.split('/').pop()
-        console.log(fileName)
+        let now = new Date()
+        let fullYear = now.getFullYear()
+        let shortYear = fullYear.toString().substr(2)
+        let month = (now.getMonth() + 1).toString().padStart(2,'0')
+        let day = now.getDate()
+        let hour = now.getHours()
+        let minute = now.getMinutes()
+        let second = now.getSeconds()
+        let random = Math.floor((Math.random() * 1000) + 1)
+        let ext = url.split('.').pop()
+        let fileName = `${shortYear}${month}${day}${hour}${minute}${second}${random}.${ext}`
+        let path = `./uploads/${fullYear}${month}/${day}/`
+        this.mkdirsSync(path)
+        // fs.exists(path, (exists) => {
+        //     if(!exists){
+        //         fs.mkdir(path, { recursive: true }, (err) => {
+        //             if (err) throw err;
+        //           });
+        //     }
+        // });
+        console.log(path)
         // request({url}).pipe(fs.createWriteStream(`./images/${fileName}`).on('close',err=>{  console.log('写入失败',err) }))
         // await request(url, async(error, response, body) => {
         //     if(!error && response.statusCode == 200){
@@ -175,7 +195,7 @@ class Spider {
         //     }
         // })
         let res = await this.getResponse(url, true)
-        console.log(res.body)
+        //console.log(res.body)
     }
 
     async isExistMeeting(title){
@@ -197,6 +217,17 @@ class Spider {
             return result
         } catch(err){
             console.log("插入记录异常：", err)
+        }
+    }
+
+    mkdirsSync(dirname) {
+        if (fs.existsSync(dirname)) {
+          return true;
+        } else {
+          if (this.mkdirsSync(path.dirname(dirname))) {
+            fs.mkdirSync(dirname);
+            return true;
+          }
         }
     }
 
